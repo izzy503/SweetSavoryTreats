@@ -1,0 +1,55 @@
+@{
+  ViewData["Title"] = "Welcome Page";
+}
+
+@{
+  Layout = "_Layout";
+}
+
+@using SweetSavoryTreats.Models;
+
+@if (User.Identity.IsAuthenticated)
+{
+  <h2>Hello, @User.Identity.Name! Welcome to Our Sweet Bakery!</h2>
+}
+else
+{
+  <h2>Welcome to Our Sweet Bakery!</h2>
+}
+
+<hr>
+
+<h4>Delightful Treats</h4>
+@if (Model["treats"] == null)
+{
+  <p>We're working on something sweet for you!</p>
+}
+<ul>
+  @foreach (Treat treat in Model["treats"])
+  {
+    <li>@Html.ActionLink(@treat.Name, "Details", "Treats", new { id = @treat.TreatId })</li>
+  }
+</ul>
+
+<hr>
+
+<h4>Flavorful Creations</h4>
+@if (Model["taste"] == null)
+{
+  <p>Plenty Of taste and flavors are coming your way!</p>
+}
+
+<ul>
+  @foreach (Taste taste in Model["taste"])
+  {
+    <li>@Html.ActionLink(@flavor.Type, "Details", "Taste", new { id = @taste.TasteId })</li>
+  }
+</ul>
+<hr>
+
+@if (User.Identity.IsAuthenticated)
+{
+  <p>@Html.ActionLink("Explore Our Treats", "Index", "Treats")</p>
+  <p>@Html.ActionLink("Discover New Taste", "Index", "Taste")</p>
+}
+<p>@Html.ActionLink("Manage Your Account", "Index", "Account")</p>
