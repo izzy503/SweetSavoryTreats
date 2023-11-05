@@ -1,0 +1,39 @@
+@{
+  Layout = "_Layout";
+}
+
+@using SweetSavoryTreats.Models
+@model SweetSavoryTreats.Models.Treat
+
+<h2>Treat Information</h2>
+<hr />
+<h3>@Html.DisplayNameFor(model => model.Name): @Html.DisplayFor(model => model.Name)</h3>
+
+@if (@Model.JoinEntities.Count == 0)
+{
+  <p>This treat doesn't have any associated flavors yet.</p>
+}
+else
+{
+  <h4>Taste for this treat</h4>
+  <ul>
+  @foreach (TasteTreat join in Model.JoinEntities)
+    {
+      <li>Taste: @join.Taste.Type</li>
+      @using (Html.BeginForm("RemoveTaste", "Treats"))
+      {
+        @Html.Hidden("joinId", @join.TasteTreatId)
+        <input type="submit" value="Remove" />
+      }
+    }
+  </ul>
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+  <p>@Html.ActionLink("Go Back to List", "Index")</p>
+  <p>@Html.ActionLink("Edit This Treat", "Edit", new { id = Model.TreatId })</p>
+  <p>@Html.ActionLink("Delete This Treat", "Delete", new { id = Model.TreatId })</p>
+  <p>@Html.ActionLink("Add Flavor", "AddTaste", new { id = Model.TreatId })</p>
+}
+@Html.ActionLink("Back to Home", "Index", "Home")

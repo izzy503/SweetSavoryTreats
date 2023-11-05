@@ -1,0 +1,14 @@
+@{
+    Layout = "_Layout";
+}
+
+@model SweetSavoryTreats.Models.Treat
+
+<h2>Confirm Deletion</h2>
+
+@Html.DisplayNameFor(model => model.Name): @Html.DisplayFor(model => model.Name)
+@using (Html.BeginForm())
+{
+    <input type="submit" value="Delete This Item" />
+}
+@Html.ActionLink("Return to List", "Index")
