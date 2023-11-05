@@ -9,10 +9,10 @@ namespace SweetSavoryTreats.Controllers
   public class AccountController : Controller
   {
     private readonly SweetSavoryTreatsContext _dbContext;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly UserManager<User> _userManager;
+    private readonly SignInManager<User> _signInManager;
 
-    public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, BakeryWithAuthContext dbContext)
+    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, BakeryWithAuthContext dbContext)
     {
       _userManager = userManager;
       _signInManager = signInManager;
@@ -30,17 +30,17 @@ namespace SweetSavoryTreats.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult> RegisterUserAction(RegisterViewModel userViewModel)
+    public async Task<ActionResult> RegisterUserAction(RegisterModel userModel)
     {
       if (!ModelState.IsValid)
       {
-        return View(userViewModel);
+        return View(userModel);
       }
       else
       {
-        ApplicationUser user = new ApplicationUser { UserName = userViewModel.Email };
-        user.DisplayName = userViewModel.DisplayName;
-        IdentityResult creationResult = await _userManager.CreateAsync(user, userViewModel.Password);
+        User user = new User { UserName = userModel.Email };
+        user.DisplayName = userModel.DisplayName;
+        IdentityResult creationResult = await _userManager.CreateAsync(user, userModel.Password);
         if (creationResult.Succeeded)
         {
           return RedirectToAction("Home");
@@ -51,7 +51,7 @@ namespace SweetSavoryTreats.Controllers
           {
             ModelState.AddModelError("", error.Description);
           }
-          return View(userViewModel);
+          return View(userModel);
         }
       }
     }
@@ -62,11 +62,11 @@ namespace SweetSavoryTreats.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult> LogInUserAction(LoginViewModel loginViewModel)
+    public async Task<ActionResult> LogInUserAction(LoginModel loginModel)
     {
       if (!ModelState.IsValid)
       {
-        return View(loginViewModel);
+        return View(loginModel);
       }
       else
       {
@@ -78,7 +78,7 @@ namespace SweetSavoryTreats.Controllers
         else
         {
           ModelState.AddModelError("", "Your email or username appears to be incorrect. Please try again.");
-          return View(loginViewModel);
+          return View(loginModel);
         }
       }
     }
