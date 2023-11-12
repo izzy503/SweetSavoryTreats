@@ -1,0 +1,24 @@
+@{
+  Layout = "_Layout";
+}
+
+@using SweetSavoryTreats.Models;
+
+<h1>Taste</h1>
+
+<h1> Taste for @User.Identity.Name</h1>
+
+@if (@Model.Count == 0)
+{
+  <h3>No taste have been added yet.</h3>
+} 
+
+<ul>
+  @foreach(Taste taste in Model)
+  {
+      <li>@Html.ActionLink($"{taste.Type}", "Details", new { id = taste.TasteId })</li>
+  }
+</ul>
+
+<p>@Html.ActionLink("Add new taste", "Create")</p>
+<p>@Html.ActionLink("Back to Home", "Index", "Home")</p>
