@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace SweetSavoryTreats
 {
+
   class Program
   {
     static void Main(string[] args)

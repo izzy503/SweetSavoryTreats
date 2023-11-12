@@ -24,5 +24,8 @@ namespace SweetSavoryTreats.ViewModels
     [Required]
     [Display(Name = "First and Last Name")]
     public string DisplayName { get; set; }
+
+    [Required]
+    public string FullName { get; set; }
   }
 }
