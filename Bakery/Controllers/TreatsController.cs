@@ -24,7 +24,7 @@ namespace Treats.Controllers
       _dbContext = dbContext;
     }
 
-    public async Task<ActionResult> ViewAllTreats()
+    public async Task<ActionResult> Index()
     {
       string currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
       User loggedInUser = await _userManager.FindByIdAsync(currentUserId);
@@ -35,13 +35,13 @@ namespace Treats.Controllers
     }
 
     [Authorize]
-    public ActionResult CreateTreat()
+    public ActionResult Create()
     {
       return View();
     }
 
     [HttpPost]
-    public async Task<ActionResult> CreateTreatEntry(Treat newTreat)
+    public async Task<ActionResult> Create(Treat newTreat)
     {
       if (!ModelState.IsValid)
       {
@@ -55,11 +55,11 @@ namespace Treats.Controllers
         newTreat.User = currentUser;
         _dbContext.Treats.Add(newTreat);
         _dbContext.SaveChanges();
-        return RedirectToAction("ViewAllTreats");
+        return RedirectToAction("Index");
       }
     }
 
-    public ActionResult DisplayTreatDetails(int id)
+    public ActionResult Details(int id)
     {
       Treat selectedTreat = _dbContext.Treats
           .Include(treat => treat.JoinEntities)
@@ -69,16 +69,16 @@ namespace Treats.Controllers
     }
 
     [Authorize]
-    public ActionResult AddTasteToTreat(int id)
+    public ActionResult AddTaste(int id)
     {
       Treat selectedTreat = _dbContext.Treats.FirstOrDefault(treat => treat.TreatId == id);
-      ViewBag.TasteId = new SelectList(_dbContext.Taste, "TasteId", "Type");
+      ViewBag.TasteId = new SelectList(_dbContext.Tastes, "TasteId", "Type");
       return View(selectedTreat);
     }
 
     [Authorize]
     [HttpPost]
-    public ActionResult AttachTaste(Treat treat, int tasteId)
+    public ActionResult AddTaste(Treat treat, int tasteId)
     {
 #nullable enable
       TasteTreat? joinEntity = _dbContext.TasteTreat.FirstOrDefault(join => join.TasteId == treat.TreatId && join.TasteId == tasteId);
@@ -88,7 +88,7 @@ namespace Treats.Controllers
         _dbContext.TasteTreat.Add(new TasteTreat() { TreatId = treat.TreatId, TasteId = tasteId });
         _dbContext.SaveChanges();
       }
-      return RedirectToAction("DisplayTreatDetails", new { id = treat.TreatId });
+      return RedirectToAction("Details", new { id = treat.TreatId });
     }
 
     [HttpPost]
@@ -110,12 +110,12 @@ namespace Treats.Controllers
         TasteTreat joinEntry = _dbContext.TasteTreat.FirstOrDefault(entry => entry.TasteTreatId == joinId);
         _dbContext.TasteTreat.Remove(joinEntry);
         _dbContext.SaveChanges();
-        return RedirectToAction("DisplayTreatDetails", new { id = joinEntry.TreatId });
+        return RedirectToAction("Details", new { id = joinEntry.TreatId });
       }
     }
 
     [Authorize]
-    public ActionResult EditTreat(int id)
+    public ActionResult Edit(int id)
     {
       Treat treatToModify = _dbContext.Treats.FirstOrDefault(treat => treat.TreatId == id);
       return View(treatToModify);
@@ -123,28 +123,28 @@ namespace Treats.Controllers
 
     [Authorize]
     [HttpPost]
-    public ActionResult ModifyTreat(Treat modifiedTreat)
+    public ActionResult Edit(Treat modifiedTreat)
     {
       _dbContext.Treats.Update(modifiedTreat);
       _dbContext.SaveChanges();
-      return RedirectToAction("DisplayTreatDetails", new { id = modifiedTreat.TreatId });
+      return RedirectToAction("Details", new { id = modifiedTreat.TreatId });
     }
 
     [Authorize]
-    public ActionResult DeleteTreat(int id)
+    public ActionResult Delete(int id)
     {
       Treat treatToDelete = _dbContext.Treats.FirstOrDefault(treat => treat.TreatId == id);
       return View(treatToDelete);
     }
 
     [Authorize]
-    [HttpPost, ActionName("DeleteTreat")]
-    public ActionResult ConfirmDeleteTreat(int id)
+    [HttpPost, ActionName("Delete")]
+    public ActionResult DeleteConfirmed(int id)
     {
       Treat treatToRemove = _dbContext.Treats.FirstOrDefault(treat => treat.TreatId == id);
       _dbContext.Treats.Remove(treatToRemove);
       _dbContext.SaveChanges();
-      return RedirectToAction("ViewAllTreats");
+      return RedirectToAction("Index");
     }
   }
 }

@@ -1,20 +1,24 @@
-@{
-  Layout = "_Layout";
+@using SweetSavoryTreats.ViewModels
+@model LoginModel
+
+<h2>Log in with your account</h2>
+<hr />
+
+@if(!ViewData.ModelState.IsValid) 
+{
+  @Html.ValidationSummary("Please fix the following errors and try again:") 
 }
 
-<h2>Welcome to Our Platform</h2>
-<hr />
-@if (User.Identity.IsAuthenticated)
+@using (Html.BeginForm())
 {
-  <p>Greetings, @User.Identity.Name!</p>
-  @using (Html.BeginForm("SignOut", "Authentication"))
-  {
-    <input type="submit" class="btn btn-primary" value="Logout" />
-  }
+  @Html.LabelFor(m => m.Email)
+  @Html.TextBoxFor(m => m.Email)
+
+  @Html.LabelFor(m => m.Password)
+  @Html.EditorFor(m => m.Password)
+
+  <input type="submit" value="Log in" />
 }
-else
-{
-  <p>@Html.ActionLink("Join Us", "Register")</p>
-  <p>@Html.ActionLink("Sign In", "Login")</p>
-}
-<p>@Html.ActionLink("Return to Main Page", "Index", "Main")</p>
+
+<p>@Html.ActionLink("Register for an account", "Register")</p>
+<p>@Html.ActionLink("Back to accounts page", "Index")</p>

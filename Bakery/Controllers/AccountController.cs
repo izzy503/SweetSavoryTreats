@@ -19,18 +19,18 @@ namespace SweetSavoryTreats.Controllers
       _dbContext = dbContext;
     }
 
-    public ActionResult Home()
+    public ActionResult Index()
     {
       return View();
     }
 
-    public IActionResult RegisterUser()
+    public IActionResult Register()
     {
       return View();
     }
 
     [HttpPost]
-    public async Task<ActionResult> RegisterUserAction(RegisterModels userModel)
+    public async Task<ActionResult> Register(RegisterModels userModel)
     {
       if (!ModelState.IsValid)
       {
@@ -43,7 +43,7 @@ namespace SweetSavoryTreats.Controllers
         IdentityResult creationResult = await _userManager.CreateAsync(user, userModel.Password);
         if (creationResult.Succeeded)
         {
-          return RedirectToAction("Home");
+          return RedirectToAction("Index");
         }
         else
         {
@@ -56,13 +56,13 @@ namespace SweetSavoryTreats.Controllers
       }
     }
 
-    public ActionResult LogInUser()
+    public ActionResult Login()
     {
       return View();
     }
 
     [HttpPost]
-    public async Task<ActionResult> LogInUserAction(LoginModel loginModel)
+    public async Task<ActionResult> Login(LoginModel loginModel)
     {
       if (!ModelState.IsValid)
       {
@@ -73,7 +73,7 @@ namespace SweetSavoryTreats.Controllers
         Microsoft.AspNetCore.Identity.SignInResult loginResult = await _signInManager.PasswordSignInAsync(loginModel.Email, loginModel.Password, isPersistent: true, lockoutOnFailure: false);
         if (loginResult.Succeeded)
         {
-          return RedirectToAction("Home");
+          return RedirectToAction("Index");
         }
         else
         {
@@ -84,10 +84,10 @@ namespace SweetSavoryTreats.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult> LogOutUser()
+    public async Task<ActionResult> LogOut()
     {
       await _signInManager.SignOutAsync();
-      return RedirectToAction("Home");
+      return RedirectToAction("Index");
     }
   }
 }

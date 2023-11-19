@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using SweetSavoryTreats.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Identity;
+using System;
 using SweetSavoryTreats.ViewModels;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SweetSavoryTreats.Controllers
 {
@@ -22,25 +24,25 @@ namespace SweetSavoryTreats.Controllers
       _dbContext = dbContext;
     }
 
-    public async Task<ActionResult> DisplayFlavors()
+    public async Task<ActionResult> Index()
     {
       string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
       User user = await _userManager.FindByIdAsync(userId);
-      List<Taste> userTaste = _dbContext.Taste
+      List<Taste> userTaste = _dbContext.Tastes
           .Where(entry => entry.User.Id == user.Id)
           .ToList();
       return View(userTaste);
     }
 
     [Authorize]
-    public ActionResult AddTasteForm()
+    public ActionResult Create()
     {
       return View();
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult> CreateTaste(Taste taste)
+    public async Task<ActionResult> Create(Taste taste)
     {
       if (!ModelState.IsValid)
       {
@@ -52,15 +54,15 @@ namespace SweetSavoryTreats.Controllers
         string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         User user = await _userManager.FindByIdAsync(userId);
         taste.User = user;
-        _dbContext.Taste.Add(taste);
+        _dbContext.Tastes.Add(taste);
         _dbContext.SaveChanges();
-        return RedirectToAction("DisplayTaste");
+        return RedirectToAction("Index");
       }
     }
 
-    public ActionResult ShowTasteDetails(int id)
+    public ActionResult Details(int id)
     {
-      Taste selectedTaste = _dbContext.Taste
+      Taste selectedTaste = _dbContext.Tastes
           .Include(taste => taste.JoinEntities)
           .ThenInclude(join => join.Treat)
           .FirstOrDefault(taste => taste.TasteId == id);
@@ -68,36 +70,81 @@ namespace SweetSavoryTreats.Controllers
     }
 
     [Authorize]
-    public ActionResult EditTasteForm(int id)
+    public ActionResult Edit(int id)
     {
-      Taste tasteToEdit = _dbContext.Taste.FirstOrDefault(taste => taste.TasteId == id);
+      Taste tasteToEdit = _dbContext.Tastes.FirstOrDefault(taste => taste.TasteId == id);
       return View(tasteToEdit);
     }
 
     [Authorize]
     [HttpPost]
-    public ActionResult ModifyTaste(Taste modifiedTaste)
+    public ActionResult Edit(Taste modifiedTaste)
     {
-      _dbContext.Taste.Update(modifiedTaste);
+      _dbContext.Tastes.Update(modifiedTaste);
       _dbContext.SaveChanges();
-      return RedirectToAction("ShowTasteDetails", new { id = modifiedTaste.TasteId });
+      return RedirectToAction("Details", new { id = modifiedTaste.TasteId });
     }
 
     [Authorize]
-    public ActionResult RemoveTasteForm(int id)
+    public ActionResult Delete(int id)
     {
-      Taste tasteToRemove = _dbContext.Taste.FirstOrDefault(taste => taste.TasteId == id);
+      Taste tasteToRemove = _dbContext.Tastes.FirstOrDefault(taste => taste.TasteId == id);
       return View(tasteToRemove);
     }
 
     [Authorize]
-    [HttpPost, ActionName("RemoveTasteForm")]
-    public ActionResult DeleteTaste(int id)
+    [HttpPost, ActionName("Delete")]
+    public ActionResult DeleteConfirmed(int id)
     {
-      Taste tasteToDelete = _dbContext.Taste.FirstOrDefault(taste => taste.TasteId == id);
-      _dbContext.Taste.Remove(tasteToDelete);
+      Taste tasteToDelete = _dbContext.Tastes.FirstOrDefault(taste => taste.TasteId == id);
+      _dbContext.Tastes.Remove(tasteToDelete);
       _dbContext.SaveChanges();
-      return RedirectToAction("DisplayTaste");
+      return RedirectToAction("Index");
+    }
+    [Authorize]
+    public ActionResult AddTreat(int id)
+    {
+      Taste toAdd = _dbContext.Tastes.FirstOrDefault(taste  => taste.TasteId == id);
+      ViewBag.TreatId = new SelectList(_dbContext.Tastes, "TasteId", "Type");
+      return View(toAdd);
+    }
+
+    [Authorize]
+    [HttpPost]
+    public ActionResult AddTreat(Taste taste, int treatId)
+    {
+      #nullable enable
+      TasteTreat? joinEntity = _dbContext.TasteTreat.FirstOrDefault(join => join.TasteId == treatId && join.TasteId == taste.TasteId);
+      #nullable disable
+      if (taste.TasteId != 0 && joinEntity == null)
+      {
+        _dbContext.TasteTreat.Add(new TasteTreat() { TreatId = treatId, TasteId = taste.TasteId });
+        _dbContext.SaveChanges();
+      }
+      return RedirectToAction("Details", new { id = treatId });
+    }
+
+    [HttpPost]
+    public ActionResult RemoveJoin(int joinId)
+    {
+      if (!User.Identity.IsAuthenticated)
+      {
+        ErrorModel error = new ErrorModel();
+        error.ErrorMessage = "You need to be logged in to do that.";
+        TasteTreat joinEntry = _dbContext.TasteTreat.FirstOrDefault(entry => entry.TasteTreatId == joinId);
+        int treatId = joinEntry.TreatId;
+        Dictionary<string, object> model = new Dictionary<string, object>();
+        model.Add("error", error);
+        model.Add("treatId", treatId);
+        return View("Error", model);
+      }
+      else
+      {
+        TasteTreat joinEntry = _dbContext.TasteTreat.FirstOrDefault(entry => entry.TasteTreatId == joinId);
+        _dbContext.TasteTreat.Remove(joinEntry);
+        _dbContext.SaveChanges();
+        return RedirectToAction("Details", new { id = joinEntry.TreatId });
+      }
     }
   }
 }

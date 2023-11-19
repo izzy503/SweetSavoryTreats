@@ -21,10 +21,10 @@ namespace SweetSavoryTreats.Controllers
     }
 
     [HttpGet("/")]
-    public async Task<ActionResult> Homepage()
+    public async Task<ActionResult> Index()
     {
       var availableTreats = _context.Treats.ToArray();
-      var availableTaste = _context.Taste.ToArray();
+      var availableTaste = _context.Tastes.ToArray();
       var viewData = new Dictionary<string, object>();
       viewData.Add("treats", availableTreats);
       viewData.Add("taste", availableTaste);
